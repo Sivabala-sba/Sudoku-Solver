@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f2f2f2, #87ceeb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+        table {
+            margin: 0 auto 20px;
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        /* Styling for 3x3 subgrid borders */
+        td {
+            border: 1px solid #ddd;
+        }
+
+        /* Add thicker borders for 3x3 blocks */
+        /* Add thick left border for every 3rd column */
+        td:nth-child(3n+1) {
+            border-left: 2px solid #555;
+        }
+
+        /* Add thick top border for every 3rd row */
+        tr:nth-child(3n+2) td {
+            border-top: 2px solid #555;
+        }
+
+        /* Add thick right and bottom borders to the last row and column */
+        td:last-child {
+            border-right: 2px solid #555;
+        }
+
+        tr:last-child td {
+            border-bottom: 2px solid #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            height: 100%;
+            font-size: 1.2em;
+            text-align: center;
+            border: none;
+            outline: none;
+            color: #333;
+            background-color: transparent;
+        }
+
+        input[type="number"]:focus {
+            background-color: #e0f7fa;
+        }
+
+        .btn {
+            font-size: 1em;
+            color: #fff;
+            background-color: #ff6f61;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #e85c54;
+        }
+
+        /* Background decoration */
+        .background-shape {
+            position: absolute;
+            top: -50px;
+            right: -100px;
+            width: 200px;
+            height: 200px;
+            background: #ff6f61;
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        .background-shape2 {
+            position: absolute;
+            bottom: -60px;
+            left: -80px;
+            width: 150px;
+            height: 150px;
+            background: #87ceeb;
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+    </style>
+    <script>
+        async function solveSudoku() {
+            const grid = [];
+            for (let i = 0; i < 9; i++) {
+                const row = [];
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.getElementById(`cell-${i}-${j}`);
+                    row.push(cell.value === "" ? 0 : parseInt(cell.value));
+                }
+                grid.push(row);
+            }
+
+            const response = await fetch("http://localhost:8080/api/sudoku/solve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(grid)
+            });
+
+            if (!response.ok) {
+                alert("Invalid Sudoku grid!");
+                return;
+            }
+
+            const solvedGrid = await response.json();
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    document.getElementById(`cell-${i}-${j}`).value = solvedGrid[i][j];
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Sudoku Solver</h1>
+    <table>
+        <tbody>
+        <!-- Generate 9x9 grid -->
+        <script>
+            for (let i = 0; i < 9; i++) {
+                document.write("<tr>");
+                for (let j = 0; j < 9; j++) {
+                    document.write(`<td><input type="number" min="1" max="9" id="cell-${i}-${j}"></td>`);
+                }
+                document.write("</tr>");
+            }
+        </script>
+        </tbody>
+    </table>
+    <button class="btn" onclick="solveSudoku()">Solve</button>
+</div>
+
+<!-- Background shapes for aesthetics -->
+<div class="background-shape"></div>
+<div class="background-shape2"></div>
+</body>
+</html>
